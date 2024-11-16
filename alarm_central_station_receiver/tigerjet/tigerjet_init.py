@@ -1,11 +1,13 @@
 import glob
 import pytjapi
-
-TJ_ID = ''
-
+import hid
 
 def hidraw_path():
-    return '/dev/hidraw%s' % TJ_ID
+    devices = hid.enumerate()
+    for device in devices:
+        if device['vendor_id'] == 0x06e6:
+            return device['path'].decode('utf-8')
+    return None
 
 
 def initialize():
@@ -31,8 +33,6 @@ def initialize():
             pytjapi.write(fd.fileno(), 0x35, 0x50)
             pytjapi.write(fd.fileno(), 0x36, 0)
 
-            global TJ_ID
-            TJ_ID = file_name[15:]
             break
     else:
         raise ValueError('Unable to find TigerJet Device')
